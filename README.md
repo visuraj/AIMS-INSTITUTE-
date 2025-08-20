@@ -1,168 +1,333 @@
-# Voice-Based Patient Call System
+# AIMS INSTITUTE – Student–Faculty Communication Platform
 
-A state-of-the-art healthcare communication solution leveraging **voice technology**, **autonomous AI agents**, and **real-time mobile applications** to enhance patient-nurse interaction in healthcare settings.
+A modern college communication & management system with **three roles** — **Student**, **Faculty**, and **Admin** — enabling seamless requests, approvals, academics tracking, and real‑time updates.
 
 ---
 
 ## Overview
 
-The **Voice-Based Patient Call System** is designed to streamline communication between patients and nurses. It uses a voice-driven interface powered by **Azure OpenAI** to understand and process patient requests, prioritize them using **Autonomous AI Agents**, and deliver them to nurses via a real-time mobile application. This system significantly improves response times and enhances patient care.
+**AIMS INSTITUTE** streamlines communication between students and faculty while giving admins robust control over access and governance. Students can submit **leave requests**, check **syllabus coverage** and **performance**, and message faculty. Faculty can approve/deny requests, publish coursework & marks, and manage sections. Admins control onboarding for both students and faculty, configure programs, and oversee the system.
+
+> Built as a full‑stack MERN + React Native project with real‑time capabilities.
 
 ---
 
 ## Key Outcomes
-- **Autonomous AI Agents**: Automatically process and act on patient requests.
-- **Speech Services Integration**: Smooth communication using **Speech-to-Text** and **Text-to-Speech** functionality.
-- **NLP-Powered Request Analysis**: Analyze and prioritize patient requests using **Azure OpenAI** and **NLP**.
-- **Voice-Driven Interface**: A seamless, voice-based system for patient requests.
-- **Nurse Mobile Application**: Real-time updates for nurses, including patient room numbers and request details.
-- **Improved Patient Care**: Faster and more efficient nurse-patient communication.
+
+* **Faster communication** between students and faculty via structured requests & real‑time updates.
+* **Transparent academics**: syllabus coverage, attendance, marks, and performance trends.
+* **Role‑based access** with admin approvals and fine‑grained permissions.
+* **Mobile‑first experience** for on‑the‑go usage (Expo/React Native app).
 
 ---
 
-## Key Features
+## Core Features
 
-### Multi-Role Authentication
-- **Patients**: Register and access the system with ease.
-- **Nurses**: Secure registration with admin approval for added control.
-- **Admins**: Comprehensive dashboard for managing nurses, requests, and system analytics.
+### 1) Student Module
 
-### Voice and AI-Driven Functionality
-- **Natural Language Processing (NLP)** for analyzing patient requests.
-- **Speech Services** (Speech-to-Text and Text-to-Speech) for seamless voice interactions.
-- **Priority Assignment**: AI assigns urgency levels to requests.
+* **Leave Requests**: create, view status, cancel.
+* **Syllabus & Coursework**: view subject-wise syllabus coverage, announcements, and resources.
+* **Performance Dashboard**: attendance %, internal marks, assignment scores, charts.
+* **Faculty Communication**: message faculty (threaded), raise queries.
+* **Notifications**: request status changes, new marks, announcements.
 
-### Real-Time Communication
-- Instant notification and live status updates for nurses.
-- Reliable communication via **Socket.IO**.
+### 2) Faculty Module
 
-### Comprehensive Dashboards
-- Admin views pending approvals, nurse activity, and system health.
-- Nurses track and respond to requests efficiently.
+* **Approve/Reject Requests** with remarks.
+* **Syllabus Management**: update coverage %, upload materials, post announcements.
+* **Assessments**: create assignments/quizzes, enter marks & attendance.
+* **Permissions**: configure which students get access to special permissions (lab usage, project slots).
+* **Messaging**: respond to student queries.
+
+### 3) Admin Module
+
+* **Onboarding & Access Control**: add/approve students and faculty; program/semester mapping.
+* **Master Data**: departments, courses, subjects, sections, academic calendar.
+* **Roles & Permissions**: RBAC policies for Student/Faculty/Admin.
+* **Audits & Reports**: usage logs, request history, performance summaries.
 
 ---
 
 ## Technology Stack
 
 ### Backend
-- **Node.js** with **Express.js**
-- **MongoDB** with **Mongoose**
-- **Socket.IO** for real-time updates
-- **JWT** for secure authentication
-- **TypeScript**
 
-### Frontend
-- **React Native** with **Expo**
-- **TypeScript**
-- **Socket.IO Client**
-- **React Navigation**
+* **Node.js** + **Express.js** (API & RBAC)
+* **MongoDB** + **Mongoose** (data models)
+* **Socket.IO** (real-time updates)
+* **JWT** + **BCrypt** (auth & password security)
+* **TypeScript** (strong typing)
 
-### AI & NLP
-- **Azure OpenAI** for NLP-powered request analysis
-- **Microsoft Speech Services** for Speech-to-Text and Text-to-Speech
+### Web & Mobile Frontend
+
+* **React** (admin + faculty web dashboard)
+* **React Native** + **Expo** (student & faculty mobile app)
+* **TypeScript**, **React Navigation**, **Socket.IO Client**
+
+### DevOps & Tooling
+
+* **dotenv** for config, **ESLint/Prettier**, **Jest** (unit tests)
+* Optional: **Docker**, **GitHub Actions** CI/CD
+
+---
+
+## System Architecture (High Level)
+
+* **API Gateway / Express Server**: REST endpoints + Socket.IO server
+* **MongoDB**: collections for users, roles, courses, sections, requests, attendance, marks, syllabus, messages
+* **Web Dashboard**: Admin & Faculty operations
+* **Mobile App**: Student-first, supports faculty basics
+
+---
+
+## Example Data Model (Simplified)
+
+```ts
+// server/src/models/LeaveRequest.ts
+interface LeaveRequest {
+  _id: string;
+  studentId: string;           // ref: User
+  facultyReviewerId: string;   // ref: User (faculty)
+  subject?: string;            // optional subject/course context
+  reason: string;
+  fromDate: Date;
+  toDate: Date;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  facultyRemark?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+---
+
+## API Endpoints (Sample)
+
+**Auth**
+
+* `POST /api/auth/register` – Admin creates users or invites
+* `POST /api/auth/login` – Issue JWT
+
+**Students**
+
+* `GET /api/students/me` – Profile & enrollment
+* `POST /api/students/leave` – Create leave request
+* `GET /api/students/leave` – List my requests
+* `GET /api/students/performance` – Attendance & marks summary
+* `GET /api/students/syllabus` – Subject coverage & materials
+
+**Faculty**
+
+* `GET /api/faculty/requests` – Pending student requests
+* `PATCH /api/faculty/requests/:id` – Approve/Reject with remark
+* `POST /api/faculty/marks` – Upsert marks
+* `PATCH /api/faculty/syllabus/:subjectId` – Update coverage
+
+**Admin**
+
+* `POST /api/admin/users` – Create/approve users
+* `POST /api/admin/courses` – Manage courses/subjects/sections
+* `GET  /api/admin/reports` – System reports
+
+**Realtime**
+
+* `socket.io`: channels for notifications, messages, request status
+
+---
+
+## Folder Structure (Monorepo Suggestion)
+
+```
+AIMS-INSTITUTE/
+├─ server/                # Node/Express API (TypeScript)
+│  ├─ src/
+│  │  ├─ config/
+│  │  ├─ middlewares/
+│  │  ├─ models/
+│  │  ├─ controllers/
+│  │  ├─ routes/
+│  │  ├─ sockets/
+│  │  └─ index.ts
+│  └─ package.json
+├─ web-admin/             # React web (Admin & Faculty dashboards)
+│  └─ src/
+├─ mobile/                # React Native (Student app; basic faculty)
+│  └─ src/
+└─ README.md
+```
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB (running locally or via a cloud service)
-- npm or yarn
-- Expo CLI
-- Android Studio or Xcode for mobile testing
 
----
+* Node.js 18+
+* MongoDB (local or cloud)
+* npm or yarn
+* Expo CLI (for mobile): `npm i -g expo-cli`
 
-### Installation
+### 1) Clone & Install
 
-#### 1. Clone the Repository
 ```bash
-git clone https://github.com/Kailash51/Voice-Based-Patient-Call-System.git
-cd Voice-Based-Patient-Call-System
+git clone https://github.com/visuraj/AIMS-INSTITUTE-.git
+cd AIMS-INSTITUTE-
 ```
-#### 2. Backend Setup
+
+#### Backend
+
 ```bash
 cd server
 npm install
+cp .env.example .env
 ```
-#### Update the .env file with your configurations:
-MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_jwt_secret
-PORT=5000
 
-#### Start the backend server:
+Fill `.env` variables (see below), then:
+
 ```bash
-npm start
+npm run dev
 ```
-#### 3. Frontend Setup
+
+#### Web Admin (React)
+
 ```bash
-cd client
+cd ../web-admin
 npm install
+npm run dev
 ```
-#### Update the configuration: Edit src/config.ts with your backend URL.
-#### Start the frontend application:
+
+#### Mobile (React Native)
+
 ```bash
+cd ../mobile
+npm install
 npx expo start -c
 ```
-#### Running the Application
-- Use the Expo Go app to scan the QR code from your terminal.
-- Alternatively, run the app on an emulator via Android Studio or Xcode.
 
-#### Default Admin Credentials
-- Username: admin
-- Password: admin
+### Environment Variables
 
+Create **server/.env**
 
-#### Contributing
-Contributions are welcome! Follow these steps: 
-
-- ##### 1. Fork the repository:
-```bash
-git fork https://github.com/Kailash51/Voice-Based-Patient-Call-System.git
 ```
-- ##### 2. Create a new branch:
-```bash
-git checkout -b feature/AmazingFeature
+PORT=5000
+MONGO_URI=mongodb+srv://<user>:<pass>@cluster/db
+JWT_SECRET=replace_with_strong_secret
+CLIENT_ORIGIN=http://localhost:5173
 ```
-- ##### 3. Commit your changes:
-```bash
-git commit -m 'Add some AmazingFeature'
+
+Create **mobile/src/config.ts**
+
+```ts
+export const API_URL = 'http://<your-local-ip>:5000';
 ```
-- ##### 4. Push to the branch:
-```bash
-git push origin feature/AmazingFeature
+
+---
+
+## Usage Flows
+
+### Student
+
+1. Login → Dashboard with attendance & marks widgets
+2. Submit **Leave Request** → gets real‑time status via notifications
+3. Check **Syllabus** per subject + resources
+4. View **Performance** trends
+
+### Faculty
+
+1. Review **Pending Requests** → Approve/Reject (with remark)
+2. Update **Syllabus Coverage**, upload materials
+3. Record **Attendance/Marks**
+
+### Admin
+
+1. Create/Approve users (students & faculty)
+2. Configure departments, courses, sections, calendar
+3. Audit logs & reports
+
+---
+
+## Security & Permissions
+
+* **RBAC** middleware checks `req.user.role` for every protected route
+* **JWT** access tokens; refresh tokens optional
+* Input validation with **zod/joi**; centralized error handler
+* **Rate limiting** & CORS configured
+
+---
+
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feat/<feature-name>`
+3. Commit: `git commit -m "feat: add <feature>"`
+4. Push: `git push origin feat/<feature-name>`
+5. Open a Pull Request
+
+---
+
+## Scripts (examples)
+
+**server/package.json**
+
+```json
+{
+  "scripts": {
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "build": "tsc -p .",
+    "start": "node dist/index.js",
+    "lint": "eslint .",
+    "test": "jest"
+  }
+}
 ```
-- ##### 5. Open a pull request for review.
 
+---
 
-#### License
-- This project is licensed under the MIT License. See the LICENSE file for details.
+## Roadmap
 
-## Important Approaches and External Services
+* [ ] Role-based dashboards with widgets
+* [ ] Bulk CSV import for students/faculty
+* [ ] Notifications center & email
+* [ ] Calendar integration (exam, events)
+* [ ] Attendance via QR/NFC (optional)
+* [ ] Export reports (PDF/CSV)
 
-### Client-Side Technologies
-- **React Native**: A framework for building mobile applications using JavaScript and React.
-- **Expo**: A set of tools and services for rapid development and testing of React Native applications.
-- **React Navigation**: A library for managing navigation and routing in React Native applications.
-- **React Native Paper**: A UI component library that follows Material Design guidelines, providing pre-built components for a consistent look and feel.
-- **Axios**: A promise-based HTTP client for making requests to the backend API.
-- **Lodash**: A utility library that simplifies common programming tasks, such as data manipulation.
-- **React Native Vector Icons**: A library for using customizable icons in the application.
+---
 
-### State Management
-- **Context API**: Used for managing global state, such as user authentication and data sharing across components.
+## License
 
-### External Services
-- **Azure OpenAI**: Utilized for natural language processing (NLP) to analyze and prioritize patient requests.
-- **Microsoft Speech Services**: Integrated for speech-to-text and text-to-speech functionalities, enhancing voice-driven interactions.
-- **Toast Notifications**: Using `react-native-toast-message` for displaying notifications and alerts to users.
+This project is licensed under the **MIT License**.
 
-### Server-Side Technologies
-- **Node.js with Express**: The backend is built using Node.js and Express.js, providing a robust framework for handling HTTP requests and managing routes.
-- **MongoDB**: A NoSQL database used for storing user data, requests, and other application-related information.
-- **Socket.IO**: Implemented for real-time communication between the server and clients, allowing for instant updates and notifications.
-- **JWT (JSON Web Tokens)**: Used for secure authentication and authorization.
+---
 
-### API Integration
-- The server integrates with external APIs to handle requests, manage appointments, and provide a seamless experience for users.
+## Quick Git Commands (first push)
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/visuraj/AIMS-INSTITUTE-.git
+git push -u origin main
+```
+
+> If your default branch is `master`, replace the last two lines with:
+
+```bash
+git push -u origin master
+```
+
+---
+
+## Screens (Suggested)
+
+* Student: Dashboard, Leave Request, Syllabus, Performance
+* Faculty: Requests, Syllabus, Assessments, Messages
+* Admin: Users, Courses/Sections, Approvals, Reports
+
+---
+
+### Notes
+
+* Replace placeholders (e.g., IPs, DB URI) with your environment values.
+* For Expo on device, ensure your phone and dev machine are on the same network.
